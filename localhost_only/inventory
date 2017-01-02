@@ -1,0 +1,5 @@
+localhost     ansible_connection=local # When you run with this option the user that you are using to run ansible-playbook is the account used to connect localhost
+
+[burp2_servers]
+localhost
+ 

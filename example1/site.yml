@@ -1,0 +1,6 @@
+---
+# file: site.yml 
+
+- name: include burp2 servers
+  include: roles.burp2_servers.yml
+

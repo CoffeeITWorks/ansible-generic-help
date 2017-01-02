@@ -1,0 +1,7 @@
+---
+# file:  group_vars/burp2_servers/burp2_server
+
+burp_module_agent: true
+burp_server_autoupgrade_enabled: true
+burp_module_test_client: true
+
