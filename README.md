@@ -114,5 +114,10 @@ More info for developers:
 [Developers.md](Developers.md)
 
 
+Other resources:
+================
+
+https://networklore.com/ansible-getting-started/
+
 
 
