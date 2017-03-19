@@ -14,22 +14,26 @@ You can even use it when you have only one host, doesn't matter if you have only
 Getting Started
 ================
 
+You need to know some basics from [ansible](http://docs.ansible.com/ansible/quickstart.html), and ofcourse [install ansible](http://docs.ansible.com/ansible/intro_installation.html)
 
-Install ansible http://docs.ansible.com/ansible/intro_installation.html#latest-releases-via-pip
+Don't be scared about it, ansible is the most simple IT automation tool and you will get benefits learing this to manage
+any other thing on your servers. Check also [how ansible works](https://www.ansible.com/how-ansible-works), and [get-started](https://www.ansible.com/get-started)
 
-Note for fedora:
-You need `python2-cryptography python2-devel python2-cffi ` and use pip2 install
-Also use `pip2 install --upgrade pip` before install
 
-Install also: `redhat-rpm-config` if not installed pip got error: gcc: error: /usr/lib/rpm/redhat/redhat-hardened-cc1: No such file or directory
+[install ansible](http://docs.ansible.com/ansible/intro_installation.html)
 
-A **simple example with burp2_server role**, but you can change the name of the role to any other on ansible-galaxy:
+Note for fedora:  
+You need `python2-cryptography python2-devel python2-cffi ` and use pip2 install  
+Also use `pip2 install --upgrade pip` before install  
+
+Install also: `redhat-rpm-config` if not installed pip got error: `gcc: error: /usr/lib/rpm/redhat/redhat-hardened-cc1:` No such file or directory
+
+
+A **simple example with burp2_server role**, but you can change the name of the role to any other on [ansible-galaxy](https://galaxy.ansible.com/):
 
 Install the role on the system: 
 
     $ ansible-galaxy install CoffeeITWorks.burp2_server
-
-Or clone the repo to you roles subdir (subidr of dir where you have your site.yml file), role folder name must be the same as specified in site.yml.
 
 Start using [Examples on this repo](#Examples on this repo)
 
@@ -42,7 +46,7 @@ Then deploy:
     # -k is to ask password for user
     # -K is to ask sudo password for the user
 
-Done! you have deployed the role choosen
+Done! you have deployed the role choosen  
 Now you can use same steps to add any other role to your servers, separate them in different groups, etc. 
 
 Check the manpage for more information 
@@ -55,15 +59,15 @@ Additional information about our roles
 
 In most of our roles: 
 
-Ubuntu support is automatically tested with molecule docker Ubuntu 14.04 and latest image.
-Debian support is automatically tested with molecule docker Debian Jessie (8)
-Centos/7 support is tested locally, check molecule.yml file for more information
+Ubuntu support is automatically tested with molecule docker Ubuntu 14.04 and latest image.  
+Debian support is automatically tested with molecule docker Debian Jessie (8)  
+Centos/7 support is tested locally, check molecule.yml file for more information  
 
 
 Environments
 ============
 
-These roles can be used in any environment, like: production, testing, development. 
+These roles can be used in any environment, like: production, testing, development.  
 
 Also ansible allows you to use almost any platform, like: bare metals servers, VMs, containers, lxc, openstack, e2, etc. 
 
@@ -73,13 +77,13 @@ Roles Variables
 
 ### Add to your host/group_vars:
  
-Create host_vars or group_vars dirs to specify you own variables to override default settings. 
+Create host_vars or group_vars dirs to specify you own variables to override default settings.  
 
-Check the [Examples on this repo](#Examples on this repo)
+Check the [Examples on this repo](#Examples on this repo)  
 
-Inside it you can add a file with the name of the group or the host where you want to add specific options of this role.
+Inside it you can add a file with the name of the group or the host where you want to add specific options of this role.  
 
-Every role has variables in `defaults/main.yml`, check those variables and then you can override any default using your host/group_vars.
+Every role has variables in `defaults/main.yml`, check those variables and then you can override any default using your host/group_vars.  
 
 
 
@@ -88,12 +92,12 @@ Examples on this repo
 
 check [localhost_only](localhost_only) or [example1](example1) examples
 
-Then modify the inventory according to you real servers
-Also modify the group_vars if required. 
+Then modify the inventory according to you real servers  
+Also modify the group_vars if required.  
 
 If required you can also modify ansible.cfg to have more options, check the ansible.cfg doc. 
 
-Ensure you have communication to your servers before start
+Ensure you have communication to your servers before start.  
 
 Check connection before run:
 
@@ -112,7 +116,4 @@ More info for developers:
 =========================
 
 [Developers.md](Developers.md)
-
-
-
 
