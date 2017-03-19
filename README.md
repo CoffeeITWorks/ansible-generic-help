@@ -31,6 +31,34 @@ Install also: `redhat-rpm-config` if not installed pip got error: `gcc: error: /
 
 A **simple example with burp2_server role**, but you can change the name of the role to any other on [ansible-galaxy](https://galaxy.ansible.com/):
 
+
+Installing roles
+----------------
+
+Before starting to define the usage of our roles, we need them installed on our 
+**[ansible-control-machine](http://docs.ansible.com/ansible/intro_installation.html#control-machine-requirements)**.
+ As we will use this machine to actively connect and push configurations to our **server/s**. 
+
+
+We will use `requirements.yml` file to make the installation of roles on multiple machines, and install multiple roles
+with one command.
+
+Add/create your `requirements.yml` file: 
+
+```yaml
+
+# burp2_server
+
+- src: CoffeeITWorks.burp2_server
+  version: master
+```
+
+Then use: 
+
+    $ sudo ansible-galaxy install -r requirements.yml
+
+Or in a traditional way:
+
 Install the role on the system: 
 
     $ ansible-galaxy install CoffeeITWorks.burp2_server
