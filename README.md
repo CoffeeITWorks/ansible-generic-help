@@ -23,12 +23,12 @@ any other thing on your servers. Check also [how ansible works](https://www.ansi
 [install ansible](http://docs.ansible.com/ansible/intro_installation.html)
 
 Note for fedora (when using pip):  
-You need `python2-cryptography python2-devel python2-cffi ` and use pip2 install  
+You need `python2-cryptography python2-devel python2-cffi openssl-devel` and use pip2 install  
 Install also: `redhat-rpm-config` if not installed pip got error: `gcc: error: /usr/lib/rpm/redhat/redhat-hardened-cc1:` No such file or directory
 
 
 Note for Ubuntu14.04 (when using pip):
-Installed: `fff` 
+Have installed: `python-dev python-cffi libssl-dev` 
 
 For all distros (when using pip):
 Also use `pip2 install --upgrade pip` before install  
