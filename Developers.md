@@ -194,3 +194,11 @@ You can see the containers running:
 And access interactivery
 
     sudo docker exec -it image-name /bin/bash
+
+Extra resources
+---------------
+
+*Specific distribution or distribution_version*
+
+https://raymii.org/s/tutorials/Ansible_-_Only_if_on_specific_distribution_or_distribution_version.html
+
