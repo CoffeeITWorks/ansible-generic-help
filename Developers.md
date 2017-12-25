@@ -3,6 +3,14 @@ Testing for developers
 
 https://molecule.readthedocs.io/en/latest/
 
+References:
+
+https://werner-dijkerman.nl/2017/09/05/using-molecule-v2-to-test-ansible-roles/amp/
+
+https://dzone.com/articles/ansible-tdd-development-using-molecule?utm_medium=feed&utm_source=feedpress.me&utm_campaign=Feed%253A%20dzone%252Fdevops
+
+http://molecule.readthedocs.io/en/latest/porting.html
+
 The following examples are to test with molecule, but you can also use your own servers and setup an [Ansible inventory](http://docs.ansible.com/ansible/intro_inventory.html)
 
 Molecule resolves some good things for a dev environment, like: automatic provision new hosts, automatic inventory for ansible, automatic deploy, automatic destroy, automatic test idempotence, etc. 
