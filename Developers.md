@@ -10,66 +10,69 @@ Molecule resolves some good things for a dev environment, like: automatic provis
 * Install molecule
 
     sudo pip install molecule
-    
+    sudo pip install docker-py
+
+* On fedora/centos also install:
+
+   sudo yum install libselinux-python
 
 Testing with molecule+docker: 
 -----------------------------
 
 Install docker-engine and requirements shown at: https://molecule.readthedocs.io/en/latest/driver/index.html#usage
 
-Example `molecule.yml` file working with centos/systemd, debian/8, Ubuntu/latest: 
+Example `molecule/default/molecule.yml` file working with centos/systemd, debian/8, Ubuntu/latest: 
+
+Those files are automatically created with: https://molecule.readthedocs.io/en/latest/usage.html#init
 
 ```yaml
 
 ---
-
+---
+dependency:
+  name: galaxy
 driver:
   name: docker
+lint:
+  name: yamllint
+platforms:
 
-docker:
-  containers:
+  - name: ansible_test-01
+    image: solita/ubuntu-systemd:16.04
+    privileged: True
+    command: /sbin/init
+    capabilities:
+      - SYS_ADMIN    
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"        
+    groups:
+      - group1
 
-      - name: ansible_burp2_server-01
-        image: ubuntu
-        image_version: latest
-        ansible_groups:
-          - group1
+  - name: ansible_test-03
+    image: centos/systemd
+    command: /sbin/init
+    capabilities:
+      - SYS_ADMIN
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    privileged: True
+    groups:
+      - group1
 
-      - name: ansible_burp2_server-master2
-        image: debian
-        image_version: '8'
-        
-        # check the example group below (you can safetly remove these lines)
-        ansible_groups:
-          - group_master
-
-      # Use with centos/systemd to ensure systemd will be available with ansible service command.
-      - name: ansible_burp2_server-03
-        image: centos/systemd
-        image_version: latest
-        volume_mounts:
-          - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-        privileged: True
-        ansible_groups:
-          - group1
-
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+scenario:
+  name: default
 verifier:
   name: testinfra
-
-ansible:
-  playbook: playbook.yml
-  
-  # Some example group
-  group_vars:
-    group_master:
-      burpsrcext: "zip"
-      burp_version: "master"
+  lint:
+    name: flake8
 ```
 
-Requirement `playbook.yml`
+Requirement `molecule/default/playbook.yml`
 --------------------------
-
-Add this file to use with `molecule.yml`
 
 ```yaml
 
@@ -84,32 +87,32 @@ Add this file to use with `molecule.yml`
     - role: ansible_burp2_server
 ```
 
+https://molecule.readthedocs.io/en/latest/examples.html
+
 Testing with travisci your `molecule.yml` file: 
 -----------------------------------------------
 
 ```yaml
-
+# http://www.jeffgeerling.com/blog/testing-ansible-roles-travis-ci-github
 sudo: required
-dist: trusty
-#group: edge
-env:
-  global:
-  - DOCKER_VERSION="1.9.1-0~trusty"
-
 language: python
 services:
   - docker
 before_install:
   - sudo apt-get -qq update
-  #- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
-  - sudo apt-get remove docker-engine -yq
-  - sudo apt-get install docker-engine=$DOCKER_VERSION -yq --no-install-suggests --no-install-recommends --force-yes -o Dpkg::Options::="--force-confnew"
+
 install:
+  - sudo apt-get install -y python-pip libssl-dev libffi-dev
   - pip install molecule
-  # - pip install required driver (e.g. docker, python-vagrant, shade)
-  - pip install docker
+  - pip install docker-py
+    #- ansible-galaxy install -r requirements.yml
+
 script:
-  - molecule test
+  - molecule --debug create
+  - molecule converge
+  - molecule syntax
+  - molecule idempotence
+
 notifications:
     webhooks: https://galaxy.ansible.com/api/v1/notifications/
 ```
@@ -127,28 +130,23 @@ Choose your provider, example for libvirt:
 
 [vagrant-libvirt](https://github.com/vagrant-libvirt/vagrant-libvirt)
 
-modify ´molecule.yml´ file and change driver, example: 
-
-    driver:
-      name: vagrant
-
-Also ensure you are using same provider as choosen:
-
-
-    providers:
-      - name: libvirt
-        type: libvirt
-
+See https://molecule.readthedocs.io/en/latest/configuration.html#vagrant
 
 Run molecule
 ------------
 
     sudo molecule test 
 
+Or first run:
+
+    sudo molecule --debug test
+
 If you are using containers ensure `docker` service is **running**
 
 Run only some parts of the test with molecule
 ---------------------------------------------
+
+See: https://molecule.readthedocs.io/en/latest/usage.html
 
 You can use the command line with other options, check `molecule --help` outpu: 
 
@@ -181,7 +179,7 @@ So for example to only test syntax and `ansible-lint` with molecule:
 
 ```bash
 molecule syntax
-molecule verify
+molecule lint
 ```
 
 Accessing interactivery to docker containers
@@ -194,3 +192,5 @@ You can see the containers running:
 And access interactivery
 
     sudo docker exec -it image-name /bin/bash
+
+You can also use `sudo molecule login --host hostname`, see https://molecule.readthedocs.io/en/latest/usage.html#login
