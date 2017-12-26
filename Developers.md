@@ -202,3 +202,8 @@ And access interactivery
     sudo docker exec -it image-name /bin/bash
 
 You can also use `sudo molecule login --host hostname`, see https://molecule.readthedocs.io/en/latest/usage.html#login
+
+Testing docker nested in docker
+-------------------------------
+
+See [docker.yml](docker.md)
