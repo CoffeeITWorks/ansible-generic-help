@@ -7,5 +7,7 @@
   hosts: burp2_servers
   # Define the list of servers and add tags so you will be able to filter the call to a tag:
   roles: 
-    - { role: CoffeeITWorks.burp2_server, tags: [ "burp2_server_all", "burp2_server" ] }
-
+    - role: CoffeeITWorks.burp2_server
+      tags: 
+        - "burp2_server_all"
+        - "burp2_server"
