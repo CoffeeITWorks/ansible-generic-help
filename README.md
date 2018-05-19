@@ -57,6 +57,10 @@ Add/create your `requirements.yml` file:
   version: master
 ```
 
+It is also possible to use github link  see: http://docs.ansible.com/ansible/latest/reference_appendices/galaxy.html#installing-multiple-roles-from-a-file 
+
+```
+
 Then use: 
 
     $ sudo ansible-galaxy install -r requirements.yml
