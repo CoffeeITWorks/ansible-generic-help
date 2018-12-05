@@ -89,6 +89,28 @@ Check the manpage for more information
 
 http://linux.die.net/man/1/ansible-playbook
 
+Good structure of files
+=======================
+
+```shell
+.
+├── ansible.cfg
+├── inventory
+│   ├── group_vars
+│   ├── host_vars
+│   └── test
+├── requirements.yml
+├── roles
+├── roles.burp2_servers.yml
+└── site.yml
+```
+
+Having this structure and running `ansible-playbook` command from that directory will provide you a lot of potential.
+
+You don't need to modify the roles itself when you install one.
+You can have your own roles inside `roles/` dir, also clone or add as git submodule on that dir.
+When you need to use your own values on some variables, add them inside `inventory/group_vars` or `inventory/host_vars` files, so you don't modify the roles file inside `defaults`.
+
 
 Additional information about our roles
 ======================================
