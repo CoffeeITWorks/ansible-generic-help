@@ -17,12 +17,19 @@ Molecule resolves some good things for a dev environment, like: automatic provis
 
 * Install molecule
 
-    sudo pip install molecule
-    sudo pip install docker-py
+    pip install --user molecule
+    pip install --user docker-py
+
+* Install docker to use with docker driver.
 
 * On fedora/centos also install:
 
    sudo yum install libselinux-python
+
+Also stop firewall and start docker on Fedora:
+
+  sudo systemctl stop firewalld
+  sudo systemctl start docker
 
 Testing with molecule+docker: 
 -----------------------------
