@@ -158,6 +158,8 @@ Or first run:
 
 If you are using containers ensure `docker` service is **running**
 
+* test command runs all the steps, so maybe you could use only converge and syntax, then destroy when you are done
+
 Run only some parts of the test with molecule
 ---------------------------------------------
 
@@ -200,7 +202,9 @@ molecule lint
 Accessing interactivery to docker containers
 --------------------------------------------
 
-You can see the containers running: 
+with docker:
+
+You can see the containers running:
 
     sudo docker ps
 
