@@ -22,16 +22,25 @@ any other thing on your servers. Check also [how ansible works](https://www.ansi
 
 [install ansible](http://docs.ansible.com/ansible/intro_installation.html)
 
-Note for fedora (when using pip):  
-You need `python2-cryptography python2-devel python2-cffi openssl-devel` and use pip2 install  
+Note for fedora (when using pip3 (python3)):  
+You need `python3-devel openssl-devel redhat-rpm-config` and use pip3 install  
 Install also: `redhat-rpm-config` if not installed pip got error: `gcc: error: /usr/lib/rpm/redhat/redhat-hardened-cc1:` No such file or directory
 
 
-Note for Ubuntu14.04 (when using pip):
-Have installed: `python-dev python-cffi libssl-dev` 
+Note for Ubuntu16.04+ (when using pip):
+Have installed: `python3-dev libssl-dev` 
 
 For all distros (when using pip):
-Also use `pip2 install --upgrade pip` before install  
+
+    pip3 install ansible
+    
+Or specific version:
+
+    pip3 install ansible==2.7.10
+
+See: https://pypi.org/project/ansible/#history
+
+Also use `pip3 install --upgrade pip` before install  
 
 A **simple example with burp2_server role**, but you can change the name of the role to any other on [ansible-galaxy](https://galaxy.ansible.com/):
 
