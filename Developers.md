@@ -18,7 +18,7 @@ Molecule resolves some good things for a dev environment, like: automatic provis
 * Install molecule
 
     pip install --user molecule
-    pip install --user docker-py
+    pip install --user docker
 
 * Install docker to use with docker driver.
 
@@ -46,44 +46,70 @@ Those files are automatically created with: https://molecule.readthedocs.io/en/l
 ---
 dependency:
   name: galaxy
+  options:
+    ignore-certs: True
+    ignore-errors: True
+    # role-file: dev_requirements.yml  # this file is at the root of the git project same place as molecule is executed
 driver:
   name: docker
-lint:
-  name: yamllint
 platforms:
 
-  - name: ansible_test-01
-    image: solita/ubuntu-systemd:16.04
-    privileged: True
+  - name: ansible_burp_reports-01
+    image: "geerlingguy/docker-ubuntu1804-ansible:latest"
+    #privileged: True
     command: /sbin/init
+    pre_build_image: true
     capabilities:
-      - SYS_ADMIN    
+      - SYS_ADMIN
+    tmpfs:
+      - /run
+      - /tmp
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"        
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
     groups:
       - group1
 
-  - name: ansible_test-03
-    image: centos/systemd
+  - name: ansible_burp_reports-02
+    image: "geerlingguy/docker-debian9-ansible"
+    #privileged: True
+    command: /sbin/init
+    pre_build_image: true
+    capabilities:
+      - SYS_ADMIN
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    groups:
+      - group1
+
+  - name: ansible_burp_reports-03
+    image: docker.io/pycontribs/centos:7
+    pre_build_image: true
     command: /sbin/init
     capabilities:
       - SYS_ADMIN
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    privileged: True
+    #privileged: True
     groups:
       - group1
 
 provisioner:
   name: ansible
-  lint:
-    name: ansible-lint
-scenario:
-  name: default
-verifier:
-  name: testinfra
-  lint:
-    name: flake8
+  config_options:
+    defaults:
+      callback_whitelist: profile_tasks
+  inventory:
+    group_vars:
+      master:
+        burpsrcext: "zip"
+        burp_version: "master"
+        burp_remove_clients:
+          - name: client_to_remove
+          - name: other_client_to_remove
+        burp_server_port_per_operation_bool: true
 ```
 
 Requirement `molecule/default/playbook.yml`
@@ -118,8 +144,10 @@ before_install:
 
 install:
   - sudo apt-get install -y python-pip libssl-dev libffi-dev
-  - pip install molecule
-  - pip install docker-py
+  - pip install ansible
+  - pip install "molecule[docker]"
+  #- pip install docker-py
+  # https://docs.ansible.com/ansible/latest/scenario_guides/guide_docker.html#requirements
     #- ansible-galaxy install -r requirements.yml
 
 script:
@@ -132,8 +160,8 @@ notifications:
     webhooks: https://galaxy.ansible.com/api/v1/notifications/
 ```
 
-Testing with molecule+vagrant: 
-------------------------------
+Testing with molecule+vagrant
+-----------------------------
 
 It's very useful for local test and ansible development, also to test burp with ansible in multiple environments/distribution. 
 
@@ -150,11 +178,15 @@ See https://molecule.readthedocs.io/en/latest/configuration.html#vagrant
 Run molecule
 ------------
 
-    sudo molecule test 
+```shell
+sudo molecule test
+```
 
 Or first run:
 
-    sudo molecule --debug test
+```shell
+sudo molecule --debug test
+```
 
 If you are using containers ensure `docker` service is **running**
 
@@ -206,11 +238,15 @@ with docker:
 
 You can see the containers running:
 
-    sudo docker ps
+```shell
+sudo docker ps
+```
 
 And access interactivery
 
-    sudo docker exec -it image-name /bin/bash
+```shell
+sudo docker exec -it image-name /bin/bash
+```
 
 You can also use `sudo molecule login --host hostname`, see https://molecule.readthedocs.io/en/latest/usage.html#login
 
