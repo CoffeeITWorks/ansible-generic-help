@@ -125,14 +125,17 @@ See https://molecule.readthedocs.io/en/latest/configuration.html#vagrant
 Run molecule
 ------------
 
+# I recommend to alway use scenario name, also very useful with github actions to use one scenario per OS
+# It will improve debugging and speed.
+
 ```shell
-sudo molecule test
+sudo molecule test -s local
 ```
 
 Or first run:
 
 ```shell
-sudo molecule --debug test
+sudo molecule --debug test -s local
 ```
 
 If you are using containers ensure `docker` or `podman` service is **running**
