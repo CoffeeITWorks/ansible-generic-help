@@ -17,47 +17,43 @@ Molecule resolves some good things for a dev environment, like: automatic provis
 
 * Install molecule
 
-    pip install --user molecule
-    pip install --user docker
+    pip install --user molecule[docker]
+    # If you want to test in local machine in fedora:
+    pip install --user docker[podman]
 
 * Install docker to use with docker driver.
 
 * On fedora/centos also install:
 
-   sudo yum install libselinux-python
+   sudo dnf install libselinux-python podman
 
-Also stop firewall and start docker on Fedora:
-
-  sudo systemctl stop firewalld
-  sudo systemctl start docker
+  sudo systemctl start podman
 
 Testing with molecule+docker: 
 -----------------------------
 
 Install docker-engine and requirements shown at: https://molecule.readthedocs.io/en/latest/driver/index.html#usage
 
-Example `molecule/default/molecule.yml` file working with centos/systemd, debian/8, Ubuntu/latest: 
+Example `molecule/local/molecule.yml` file working with centos/systemd, debian, Ubuntu/latest: 
 
 Those files are automatically created with: https://molecule.readthedocs.io/en/latest/usage.html#init
 
 ```yaml
-
----
 ---
 dependency:
   name: galaxy
   options:
     ignore-certs: True
     ignore-errors: True
-    # role-file: dev_requirements.yml  # this file is at the root of the git project same place as molecule is executed
+    role-file: dev_requirements.yml  # this file is at the root of the git project same place as molecule is executed
 driver:
-  name: docker
+  name: podman
 platforms:
 
-  - name: ansible_burp_reports-01
-    image: "geerlingguy/docker-ubuntu1804-ansible:latest"
+  - name: ansible_burp2_server-04
+    image: "geerlingguy/docker-centos8-ansible"
+    command: /usr/sbin/init
     #privileged: True
-    command: /sbin/init
     pre_build_image: true
     capabilities:
       - SYS_ADMIN
@@ -67,53 +63,29 @@ platforms:
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
     groups:
-      - group1
-
-  - name: ansible_burp_reports-02
-    image: "geerlingguy/docker-debian9-ansible"
-    #privileged: True
-    command: /sbin/init
-    pre_build_image: true
-    capabilities:
-      - SYS_ADMIN
-    tmpfs:
-      - /run
-      - /tmp
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    groups:
-      - group1
-
-  - name: ansible_burp_reports-03
-    image: docker.io/pycontribs/centos:7
-    pre_build_image: true
-    command: /sbin/init
-    capabilities:
-      - SYS_ADMIN
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    #privileged: True
-    groups:
-      - group1
+      - use_pip_package
 
 provisioner:
   name: ansible
   config_options:
     defaults:
       callback_whitelist: profile_tasks
+    ssh_connection:
+      pipelining: false
+      ssh_args: -o ControlMaster=auto -o ControlPersist=60s
   inventory:
     group_vars:
       master:
         burpsrcext: "zip"
         burp_version: "master"
-        burp_remove_clients:
-          - name: client_to_remove
-          - name: other_client_to_remove
         burp_server_port_per_operation_bool: true
+
 ```
 
-Requirement `molecule/default/playbook.yml`
---------------------------
+Requirement `molecule/local/converge.yml`
+-----------------------------------------
+
+Playbook file to run with ansible for the test.
 
 ```yaml
 
@@ -130,35 +102,10 @@ Requirement `molecule/default/playbook.yml`
 
 https://molecule.readthedocs.io/en/latest/examples.html
 
-Testing with travisci your `molecule.yml` file: 
------------------------------------------------
+Testing with github actions your `molecule` scenarios: 
+------------------------------------------------------
 
-```yaml
-# http://www.jeffgeerling.com/blog/testing-ansible-roles-travis-ci-github
-sudo: required
-language: python
-services:
-  - docker
-before_install:
-  - sudo apt-get -qq update
-
-install:
-  - sudo apt-get install -y python-pip libssl-dev libffi-dev
-  - pip install ansible
-  - pip install "molecule[docker]"
-  #- pip install docker-py
-  # https://docs.ansible.com/ansible/latest/scenario_guides/guide_docker.html#requirements
-    #- ansible-galaxy install -r requirements.yml
-
-script:
-  - molecule --debug create
-  - molecule converge
-  - molecule syntax
-  - molecule idempotence
-
-notifications:
-    webhooks: https://galaxy.ansible.com/api/v1/notifications/
-```
+See my example files in role: https://github.com/CoffeeITWorks/ansible_burp2_server/tree/master/.github/workflows
 
 Testing with molecule+vagrant
 -----------------------------
@@ -188,7 +135,7 @@ Or first run:
 sudo molecule --debug test
 ```
 
-If you are using containers ensure `docker` service is **running**
+If you are using containers ensure `docker` or `podman` service is **running**
 
 * test command runs all the steps, so maybe you could use only converge and syntax, then destroy when you are done
 
