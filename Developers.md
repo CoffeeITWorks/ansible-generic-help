@@ -17,20 +17,25 @@ Molecule resolves some good things for a dev environment, like: automatic provis
 
 * Install molecule
 
-    pip install --user molecule[docker]
+```bash
+    python3 -m pip install --user molecule[docker]
     # If you want to test in local machine in fedora:
-    pip install --user docker[podman]
+    python3 -m pip install --user docker[podman]
+```
 
-* Install docker to use with docker driver.
+* Install docker to use with docker driver or podman.
 
 * On fedora/centos also install:
 
-   sudo dnf install libselinux-python podman
-
+```bash
+  sudo dnf install libselinux-python podman
   sudo systemctl start podman
+```
 
 Testing with molecule+docker: 
 -----------------------------
+
+---
 
 Install docker-engine and requirements shown at: https://molecule.readthedocs.io/en/latest/driver/index.html#usage
 
@@ -38,66 +43,30 @@ Example `molecule/local/molecule.yml` file working with centos/systemd, debian, 
 
 Those files are automatically created with: https://molecule.readthedocs.io/en/latest/usage.html#init
 
-```yaml
----
-dependency:
-  name: galaxy
-  options:
-    ignore-certs: True
-    ignore-errors: True
-    role-file: dev_requirements.yml  # this file is at the root of the git project same place as molecule is executed
-driver:
-  name: podman
-platforms:
+Check an updated structure scenario at: 
 
-  - name: ansible_burp2_server-04
-    image: "geerlingguy/docker-centos8-ansible"
-    command: /usr/sbin/init
-    #privileged: True
-    pre_build_image: true
-    capabilities:
-      - SYS_ADMIN
-    tmpfs:
-      - /run
-      - /tmp
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    groups:
-      - use_pip_package
+https://github.com/CoffeeITWorks/ansible_burp2_server/tree/master/molecule/ubuntu-2004
 
-provisioner:
-  name: ansible
-  config_options:
-    defaults:
-      callback_whitelist: profile_tasks
-    ssh_connection:
-      pipelining: false
-      ssh_args: -o ControlMaster=auto -o ControlPersist=60s
-  inventory:
-    group_vars:
-      master:
-        burpsrcext: "zip"
-        burp_version: "master"
-        burp_server_port_per_operation_bool: true
+And good example for local run at:
 
-```
+https://github.com/CoffeeITWorks/ansible_burp2_server/tree/master/molecule/local
 
 Requirement `molecule/local/converge.yml`
 -----------------------------------------
+
+---
 
 Playbook file to run with ansible for the test.
 
 ```yaml
 
 ---
-- hosts: all
-  # You can change or remove this serial line to allow more parallel work
-  # I have added it to use with travisci with less load to the travis
-  serial: 1
-  vars:
-    burp_module_test_client: true
-  roles:
-    - role: ansible_burp2_server
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Include ansible_burp2_server
+      include_role: 
+        name: ansible_burp2_server
 ```
 
 https://molecule.readthedocs.io/en/latest/examples.html
@@ -105,10 +74,26 @@ https://molecule.readthedocs.io/en/latest/examples.html
 Testing with github actions your `molecule` scenarios: 
 ------------------------------------------------------
 
+---
+
 See my example files in role: https://github.com/CoffeeITWorks/ansible_burp2_server/tree/master/.github/workflows
+
+There are 2 files in this example: 
+
+Normal tests for every push:
+
+    molecule-test.yml
+
+Normal test for master and tags:
+
+    galaxy-notify.yml
+
+You will need to add a `secret` with your `galaxy-api-key` in your repository `settings` -> `secrets` -> `actions`
 
 Testing with molecule+vagrant
 -----------------------------
+
+---
 
 It's very useful for local test and ansible development, also to test burp with ansible in multiple environments/distribution. 
 
@@ -125,8 +110,10 @@ See https://molecule.readthedocs.io/en/latest/configuration.html#vagrant
 Run molecule
 ------------
 
-# I recommend to alway use scenario name, also very useful with github actions to use one scenario per OS
-# It will improve debugging and speed.
+---
+
+I recommend to alway use scenario name, also very useful with github actions to use one scenario per OS
+It will improve debugging and speed.
 
 ```shell
 sudo molecule test -s local
@@ -186,7 +173,7 @@ Accessing interactivery to docker containers
 
 with docker:
 
-You can see the containers running:
+You can see the containers running (you can also use podman):
 
 ```shell
 sudo docker ps
