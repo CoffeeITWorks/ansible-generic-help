@@ -1,0 +1,126 @@
+---
+# This is example file with advanced logic to always reinstall your roles from requirements.yml when ansible version changes
+# Requires: requirements.yml
+
+- name: Tasks to get ansible version
+  hosts: ansible_control_machines
+  vars:
+    ansible_install_control_user: jenkins
+    ansible_version_file: ~/.ansible/ansible_version.txt
+  become: true
+  become_user: "{{ ansible_install_control_user }}"
+  tasks:
+  - name: Get ansible version from command line
+    shell: ansible --version | head -n 1 | awk '{print $2}'
+    register: ansible_version
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    changed_when: false
+
+  - name: Get ansible version from remote file
+    shell: cat {{ ansible_version_file }}
+    register: ansible_version_from_file
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    changed_when: false
+    failed_when: false
+
+  - name: Debug ansible version
+    debug:
+      msg: "ansible version: {{ ansible_version.string }}"
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    changed_when: false
+    failed_when: false
+
+  - name: Debug ansible version from file
+    debug:
+      msg: "ansible version from file: {{ ansible_version_from_file.stdout }}"
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    changed_when: false
+    failed_when: false
+
+  - name: Message when ansible version id different to ansible_version_from_file
+    debug:
+      msg: "ansible version: {{ ansible_version.string }} is different to ansible_version_from_file: {{ ansible_version_from_file.stdout }}"
+    when: ansible_version.string != ansible_version_from_file.stdout
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    changed_when: false
+    failed_when: false
+  
+  - name: Set ansible_install_roles_update to true when ansible_version is different to ansible_version_from_file
+    set_fact:
+      ansible_install_roles_update: true
+    when: ansible_version.string != ansible_version_from_file.stdout
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    changed_when: false
+    failed_when: false
+
+  - name: Create ansible_version_file in remote host from current ansible_version
+    copy:
+      content: "{{ ansible_version.string }}"
+      dest: "{{ ansible_version_file }}"
+    when: ansible_version.string != ansible_version_from_file.stdout
+    become: true
+    become_user: "{{ ansible_install_control_user }}"
+    failed_when: false
+
+- name: Install ansible roles
+  hosts: ansible_control_machines
+  # become: yes
+  vars:
+    ansible_install_roles_update: false
+    ansible_install_debops: false
+    ansible_install_control_user: jenkins
+    #environment: "{{ proxy_env }}"
+  tasks:
+    - name: install_roles | Update all roles
+      file:
+        path: ~/.ansible/roles/
+        state: absent
+      when: ansible_install_roles_update | bool
+      become: true
+      become_user: "{{ ansible_install_control_user }}"
+
+    - name: set requirements temporal file to use
+      set_fact:
+        requirements_filename: /tmp/requirements_{{ ansible_env.USER }}.yml
+        ansible_config_filename: /tmp/ansible_{{ ansible_env.USER }}.cfg
+      become: true
+      become_user: "{{ ansible_install_control_user }}"
+
+    # put your requirements.yml in same dir as install_roles.yml to get it working
+    # ansible uses same playbook dir by default
+    - name: install_roles | copy requirements file
+      copy:
+        src: requirements.yml
+        dest: "{{ requirements_filename }}"
+      become: true
+      become_user: "{{ ansible_install_control_user }}"
+
+    - name: install_roles | copy ansible.cfg file
+      copy:
+        src: ansible.cfg
+        dest: "{{ ansible_config_filename }}"
+      become: true
+      become_user: "{{ ansible_install_control_user }}"
+
+    - name: Install roles from requirements.yml
+      shell: ANSIBLE_CONFIG={{ ansible_config_filename }} ansible-galaxy install --ignore-certs -vvvv -r {{ requirements_filename }}
+      become: true
+      become_user: "{{ ansible_install_control_user }}"
+      changed_when: false
+
+    - name: set ulimit for control user to avoid issue #35344
+      # Add or modify nofile soft limit for the user jenkins
+      # also could see https://support.cloudbees.com/hc/en-us/articles/204246140-Too-many-open-files
+      pam_limits:
+        domain: "{{ ansible_install_control_user }}"
+        limit_type: soft
+        limit_item: nofile
+        value: 64000
+      become: true
+      become_method: ansible.builtin.sudo
